@@ -3,13 +3,30 @@ local utils = require("gist.core.utils")
 
 local M = {}
 
+---@param opts table
+---@param args table
+---@return string?
+local function get_description(opts, args)
+    if args.description ~= nil then
+        return args.description
+    end
+
+    local first_arg = opts.fargs[1]
+    if first_arg ~= nil and not first_arg:find("=", 1, true) then
+        return first_arg
+    end
+end
+
 ---@param content string
 ---@param ctx CreateContext
 local function create(content, ctx)
   local gist = require("gist")
 
   if not gist.is_initialized() then
-    vim.notify("gist.nvim: setup() must be called before using this plugin", vim.log.levels.ERROR)
+        vim.notify(
+            "gist.nvim: setup() must be called before using this plugin",
+            vim.log.levels.ERROR
+        )
     return
   end
 
@@ -24,7 +41,10 @@ local function create(content, ctx)
   )
 
   if err ~= nil then
-    vim.notify("Error creating Gist: " .. tostring(err), vim.log.levels.ERROR)
+        vim.notify(
+            "Error creating Gist: " .. tostring(err),
+            vim.log.levels.ERROR
+        )
     return
   end
 
@@ -44,14 +64,17 @@ function M.from_buffer(opts)
 
   local start_line = opts.line1
   local end_line = opts.line2
-  local description = opts.fargs[1]
+    local description = get_description(opts, args)
 
-  if start_line ~= end_line then
+    if opts.range > 0 then
     content = utils.get_current_selection(start_line, end_line)
+    else
+        content = utils.read_current_buffer_content()
   end
 
   return create(content, {
     description = description,
+        filename = args.filename,
     is_public = args.public,
   })
 end
@@ -59,10 +82,11 @@ end
 --- Creates a Gist from the current file.
 function M.from_file(opts)
   local args = utils.parseArgs(opts.args)
-  local description = opts.fargs[1]
+    local description = get_description(opts, args)
 
   create(nil, {
     description = description,
+        filename = args.filename,
     is_public = args.public,
   })
 end

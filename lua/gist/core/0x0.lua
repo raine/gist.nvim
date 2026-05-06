@@ -1,13 +1,13 @@
 M = {}
 
-local utils = require('gist.core.utils')
+local utils = require("gist.core.utils")
 local gist = require("gist")
 
 ---@param content string
 ---@param private boolean
 function M.create(_, content, _, private)
   ---@type Gist.Platforms.0x0
-  local config = gist.config.platforms['0x0']
+    local config = gist.config.platforms["0x0"]
 
   if content == nil then
     content = utils.read_current_buffer_content()
@@ -21,8 +21,10 @@ function M.create(_, content, _, private)
   local cmd = {
     "curl",
     "-sS",
-    "-H", "User-Agent: gist.nvim/1.0.5",
-    "-F", string.format("file=@%s", filename),
+        "-H",
+        "User-Agent: gist.nvim/1.0.5",
+        "-F",
+        string.format("file=@%s", filename),
   }
 
   if config.private or private then
@@ -50,9 +52,9 @@ function M.create(_, content, _, private)
   return url, nil
 end
 
-function M.get_create_details()
+function M.get_create_details(ctx)
   return {
-    filename = vim.fn.expand("%:t"),
+        filename = utils.resolve_filename(ctx and ctx.filename),
     description = "",
     is_private = gist.config.platforms["0x0"].private or false,
   }

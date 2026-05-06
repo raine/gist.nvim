@@ -93,6 +93,7 @@ function M.parseArgs(args)
   local parsed = {}
 
   for _, arg in ipairs(vim.split(args, " ", {})) do
+        if arg ~= "" then
     local key, value = unpack(vim.split(arg, "=", { plain = true }))
 
     if value == "true" then
@@ -103,8 +104,24 @@ function M.parseArgs(args)
 
     parsed[key] = value
   end
+    end
 
   return parsed
+end
+
+---@param filename string?
+---@return string
+function M.resolve_filename(filename)
+    if filename ~= nil and filename ~= "" then
+        return filename
+    end
+
+    filename = vim.fn.expand("%:t")
+    if filename ~= nil and filename ~= "" then
+        return filename
+    end
+
+    return "untitled"
 end
 
 function M.detect_multiplexer()
